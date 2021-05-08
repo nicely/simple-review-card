@@ -1,0 +1,223 @@
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Quimbee - Simple Review Card Powered by Vue.js</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet"> 
+    <style>
+      /* Simple Reset Css */
+      html {
+        box-sizing: border-box;
+      }
+
+      *, *:before, *:after {
+        box-sizing: inherit;
+      }
+
+      body{
+        background: #F9F9F9;
+        font-family: 'Lato', sans-serif, Helvetica, Arial, sans-serif;
+        font-size: 14px;
+      }
+
+      body, h1, h2, h3, h4, h5, h6, p, ol, ul {
+        margin: 1rem;
+        padding: 1rem;
+        font-weight: normal;
+      }
+
+      ol, ul {
+        list-style: none;
+      }
+
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+
+      /* Review Card */
+      .cardWrapper{
+        background: #ffffff;
+        width: 100%;
+        border: 3px solid #DBDBDB;
+        border-radius: .6rem;
+        padding: 1.5rem;
+      }
+      .reviewer{
+        width: 100%;
+        display: flex;
+        margin-bottom: 16px;
+        align-items: center;
+      }
+
+      .reviewer div.avatar img{
+        width: 50px;
+        border-radius: 25px;
+      }
+
+      .reviewer div.info{
+        display: flex;
+        flex-direction: column;
+        margin-left: 16px;
+      }
+
+      .reviewer div.info div.name{
+        font-size: 14px;
+        font-weight: 600;
+        color: #161619;
+        margin-bottom: 10px;
+      }
+      .reviewer div.info div.status{
+        font-size: 12px;
+        color: #2E7D32;
+      }
+
+      .reviewer div.info div.status i{
+        margin-right: 4px;
+      }
+
+      .reviewContent {
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* The review summary should be 12px, 600 weight, color #161619 */
+      .reviewContent div.summary {
+        font-size: 12px;
+        font-weight: 600;
+        color: #161619;
+        margin-bottom: 8px;
+      }
+
+      /* The review description should be 12px, color #535358 */
+      .reviewContent div.description {
+        font-size: 12px;
+        color: #535358;
+        margin-bottom: 16px;
+      }
+
+      .reviewContent div.result{
+        display: flex;
+        flex-direction: column;
+      }
+
+      .reviewContent div.result div.point{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .reviewContent div.result div.star{
+        margin-right: 8px;
+        font-size: 14px;
+      }
+
+      .reviewContent div.result div.star .empty{
+        color:#dddddd;
+      }
+
+      .reviewContent div.result div.star .filled{
+        color:#EEAA46;
+      }
+
+      .reviewContent div.result div.text{
+        font-size: 12px;
+      }
+
+      .reviewContent div.result div.for{
+        font-size: 12px;
+      }
+
+      .reviewContent div.date{
+        font-size: 12px;
+        margin-top: 16px;
+        color: #535358;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="cardWrapper">
+        <div class="reviewer">
+          <div class="avatar">
+            <img :src="card.purchaser.avatar" v-bind:alt="card.purchaser.firstName + card.purchaser.lastName">
+          </div>
+          <div class="info">
+            <div class="name">{{ card.purchaser.firstName }} {{ card.purchaser.lastName }}</div>
+            <div class="status">
+              <span v-html="card.purchaser.status"></span>
+            </div>
+          </div>
+        </div>
+        <div class="reviewContent">
+          <div class="summary">{{ card.purchaser.reviewContent.summary }}</div>
+          <div class="description">{{ card.purchaser.reviewContent.description }}</div>
+          <div class="result">
+            <div class="point">
+              <div class="star" >
+                <span v-html="starGenerator(card.purchaser.reviewContent.result.point)"></span>
+              </div>
+              <div class="text">{{ card.purchaser.reviewContent.result.point }} out of {{this.resultOptions.outOf}}</div>
+            </div>
+            <div class="for">
+              for <b>{{ card.purchaser.reviewContent.result.for }}</b>
+            </div>
+          </div>
+          <div class="date">Reviewed {{ ago(card.purchaser.reviewContent.date) }}</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      var app = new Vue({
+      el: '#app',
+      data: {
+        card: {
+          purchaser: {
+            firstName: 'Matthew',
+            lastName: 'Folkner',
+            avatar: 'https://i.pravatar.cc/300',
+            status: '<i class="fas fa-user-check"></i> Verified  purchaser',
+            reviewContent: {
+              summary: 'Quimbee is the best thing ever. And this goes to two lines.',
+              description: 'I love Quimbee. It saved me in 1L and it\'s saving me 2L. I love it all and it\'s money well spent.',
+              result: {
+                point: 4,
+                for: 'Quimbee Bar Review'
+              },
+              date: '20210503'
+            }
+          }
+        },
+        resultOptions:{
+          outOf: 5 //You can easily set max number for star reviews
+        }
+      },
+      methods:{
+        starGenerator(point){
+          if(point > this.resultOptions.outOf) return alert("The point must be lower than specified 'Out Of' number");
+
+          let text = '';
+          let i = 1;
+
+          while (i <= this.resultOptions.outOf) {
+            text += (i <= point) ? '<i class="fas fa-star filled"></i>' : '<i class="fas fa-star empty"></i>';
+            i++;
+          }
+
+          return  text;
+        },
+        ago(date){
+          return  moment(date, "YYYYMMDD").fromNow();
+        }
+      }
+    })
+    </script>
+
+  </body>
+</html>
+
